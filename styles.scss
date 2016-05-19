@@ -1,0 +1,629 @@
+/* imports */
+
+@import url('//fonts.googleapis.com/css?family=Lato:900&subset=latin,latin-ext');
+
+/* vars */
+
+$blue-dark: #3B4163;
+$blue-light: #4D71FA;
+$blue-pants: #3C5A92;
+$white-almost: #F5F5F5;
+$gray-dark: #53555D;
+$gray-light: #C4C4C7;
+$green-dark: #70AF3B;
+$green-ligth: #8AC657;
+$red-light: #FFADAD; 
+$skin-color: #FECE8A; 
+$base-font: 'Lato', 'Arial';
+
+/* mixins */
+
+@mixin center-both {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin triangle ($size, $color) {
+  border-right: $size solid $color;
+  border-bottom: $size solid $color;
+  border-left: $size solid transparent;
+  border-top: $size solid transparent;
+}
+
+/* animations */
+
+@keyframes shake {
+  0% { transform: translateX(3px); }
+  50% { transform: translateX(-3px); }
+  100% { transform: translateX(3px); }
+}
+
+@keyframes twist {
+  0% { transform: translateX(3px); }
+  50% { transform: translateX(-3px); }
+  100% { transform: translateX(3px); }
+}
+
+@keyframes sleep-well-angel {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* html elements */
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-size: 16px;
+}
+
+/* common classes */
+
+.shake { 
+  animation: shake 0.15s ease 3;
+}
+
+.oval-button {
+  $yellow: #FCA900;
+  $white: #FFF;
+
+  display: inline-block;
+  padding: 0.7em 2em;
+  border: 0.15em dashed $yellow;
+  border-radius: 40px;
+  transition: all 300ms ease;
+  position: relative;
+  color: $yellow;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: none;
+  font-weight: 900;
+
+  &:hover {
+    color: $white;
+    border-style: dotted;
+  }
+
+  &:focus {
+    background: $yellow;
+    color: $white;
+  } 
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: background 300ms;
+
+  &.visible {
+    display: block;
+    background: rgba(59, 65, 99, 0.7);
+  }
+
+  &.hidden {
+    display: none;
+    background: #FFF;
+  }
+}
+
+.result-label {
+  text-transform: uppercase;
+}
+
+.letter-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.letter {
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+
+
+#root {
+  background: $blue-dark;
+  font-family: $base-font;
+  position: relative;
+  height: 100%;
+}
+
+.hangman-game {
+  @include center-both;
+  overflow: hidden;
+  background: $white-almost;
+  border-radius: 5px;
+  width: 800px;
+  height: 492px;
+
+  &:after {
+    @include triangle(100px, $blue-light);
+    position: absolute;
+    content: '';
+    display: block;
+    bottom: 0;
+    right: 0;
+  }
+}
+
+
+
+.game-end .oval-button {
+  font-size: 1.2em;
+}
+
+.game-end {
+  transition: top 1s cubic-bezier(.48,.27,1,0);
+  z-index: 10;
+}
+
+.game-end .content {
+  @include center-both;
+  top: -1000px;
+}
+
+.game-end.visible .content {
+  top: 50%;
+  left: 50%;
+  text-align: center;
+}
+
+.game-end .result-label {
+  font-size: 3em;
+  text-align: center;
+  color: $white-almost;
+  margin-bottom: 10px;
+}
+
+.game-end .error {
+  color: $red-light;
+  font-weight: normal;
+  margin: 20px;
+}
+
+.game-end .answer {
+  color: $white-almost;
+  font-weight: normal;
+  margin: 20px;
+}
+
+.incorrect-area {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60%;
+  padding: 35px;
+}
+
+.incorrect-area .result-label {
+  color: $gray-dark;
+  font-size: 1em;
+}
+
+.letter.incorrect {
+  color: $blue-light;
+  font-size: 2.5em;
+  margin-right: 0.2em;
+}
+
+
+.correct-area {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  z-index: 1;
+  perspective: 500px;
+}
+
+.letter.correct,
+.letter.empty {
+  position: relative;
+  width: 60px;
+  height: 70px;
+  margin: 0 2px;
+  border-radius: 4px;
+}
+
+.letter.correct {
+  color: $white-almost;
+  font-weight: 900;
+  font-size: 2em;
+  position: relative;
+  perspective: 800px;
+
+  & .card {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+
+    & div {
+      margin: 0;
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: $gray-dark;
+      padding-top: 16px;
+      border-radius: 4px;
+    }
+
+    & div.back {
+      transform: rotateY( 180deg );  
+    }
+  }
+
+  &.guessed .card {
+    transform: rotateY( 180deg );
+  }
+}
+
+.letter.empty {
+  background: $gray-light;
+}
+
+.gallows {
+  position: absolute;
+  height: 400px;
+  width: 200px;
+  top: 0;
+  left: 0;
+
+  .bar {
+    position: absolute;
+    background: $gray-dark;
+    border-radius: 4px;
+    height: 15px;
+  }
+
+  .horizontal-bar {
+    width: 130px;
+    top: 35px;
+    left: -5px;
+  }
+
+  .vertical-bar {
+    width: 50px;
+    transform: rotate(90deg);
+    top: 55px;
+    left: 73px;
+  }
+}
+
+.poor-dude {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 65px;
+  
+  .head {
+    visibility: hidden;
+    position: relative;
+    z-index: 2;
+    background: url('./head.png');
+    background-repeat: no-repeat;
+    background-size: 96px 106px;
+    width: 100px;
+    height: 120px;
+    margin: 0 auto;
+    transition: transform 600ms ease;
+  }
+
+  .neck {
+    visibility: hidden;
+    background: $skin-color;
+    width: 23px;
+    height: 33px;
+    border-radius: 10px;
+    margin: -25px auto 0;
+  }
+
+  .body-wrapper {
+    position: relative;
+    width: 100%;
+    height: 170px;
+  }
+
+  .chest {
+    visibility: hidden;
+    width: 52px;
+    height: 82px;
+    margin: -10px auto 0;
+    background: $blue-pants;
+    border-radius: 5px;
+    position: relative;
+
+    &:before, 
+    &:after {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 80%;
+      content: '';
+      display: block;
+    }
+
+    &:before {
+      background: $green-ligth;
+      border-top-left-radius: 5px;
+      left: 0;
+    }
+
+    &:after {
+      background: $green-dark;
+      border-top-right-radius: 5px;
+      right: 0;
+    }
+  }
+
+  .arms {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+
+    &:before,
+    &:after {
+      visibility: hidden;
+      content: '';
+      width: 23px;
+      height: 67px;
+      position: absolute;
+      border-radius: 5px;
+      top: 0;
+    }
+
+    &:before {
+      background: $green-dark;
+      left: 50%;
+      transform: rotate(-45deg);
+      transform-origin: 20px 0;
+    }
+
+    &:after {
+      background: $green-ligth;
+      right: 50%;
+      transform: rotate(45deg);
+      transform-origin: 0 0;
+    }
+  }
+
+  .hands {
+    position: absolute;
+    width: 100%;
+    height: 65px;
+    top: 0;
+
+    &:before,
+    &:after {
+      visibility: hidden;
+      content: '';
+      position: absolute;
+      bottom: 0;
+      border-radius: 50%;
+      width: 15px;
+      height: 15px;
+      background: $skin-color;
+    }
+
+    &:before {
+      left: 28px;
+    }
+
+    &:after {
+      right: 28px;
+    }
+  }
+
+  .legs {
+    width: 85px;
+    height: 89px;
+    margin: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 76px;
+    z-index: 10;
+
+    &:before,
+    &:after {
+      visibility: hidden;
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 87px;
+      background: $blue-pants;
+      border-radius: 5px;
+      top: 0;
+    }
+
+    &:before {
+      left: 50%;
+      transform: rotate(-12deg);
+      transform-origin: 0 0;
+    }
+
+    &:after {
+      right: 50%;
+      transform: rotate(12deg);
+      transform-origin: 25px 0;
+    }
+  }
+
+  .feet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    &:before,
+    &:after {
+      visibility: hidden;
+      content: '';
+      position: absolute;
+      width: 41px;
+      height: 14px;
+      background: $skin-color;
+      border-radius: 5px;
+      bottom: 0;
+    }
+
+    &:before {
+      right: 39px;
+      transform: rotate(-8deg);
+      transform-origin: 0 0;
+    }
+
+    &:after {
+      left: 39px;
+      transform: rotate(8deg);
+      transform-origin: 41px 0;
+    }
+  }
+}
+
+
+.sleep-well-angel .poor-dude {
+  animation: sleep-well-angel 3000ms ease infinite;
+  
+  .head {
+    transform: rotate(-25deg);
+  }
+}
+
+.poor-dude.stadium-1 {
+  & .head { visibility: visible }
+}
+
+.poor-dude.stadium-2 {
+  & .head,
+  & .neck { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-3 {
+  & .head,
+  & .neck,
+  & .chest { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-4 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-5 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-6 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before,
+  & .hands:after { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-7 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before,
+  & .hands:after,
+  & .hands:before { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-8 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before,
+  & .hands:after,
+  & .hands:before,
+  & .legs:after { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-9 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before,
+  & .hands:after,
+  & .hands:before,
+  & .legs:after,
+  & .legs:before { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-10 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before,
+  & .hands:after,
+  & .hands:before,
+  & .legs:after,
+  & .legs:before,
+  & .feet:after { 
+    visibility: visible 
+  }
+}
+
+.poor-dude.stadium-11 {
+  & .head,
+  & .neck,
+  & .chest,
+  & .arms:after,
+  & .arms:before,
+  & .hands:after,
+  & .hands:before,
+  & .legs:after,
+  & .legs:before,
+  & .feet:after,
+  & .feet:before { 
+    visibility: visible 
+  }
+}
